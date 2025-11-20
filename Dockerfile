@@ -4,6 +4,9 @@ FROM python:3.11-slim
 # 作業ディレクトリ作成
 WORKDIR /app
 
+# app フォルダ内の内容をコンテナの /app にコピー
+COPY app/ .
+
 # 依存ファイルを先にコピー（キャッシュ効率良くするため）
 COPY requirements.txt .
 
