@@ -1,0 +1,342 @@
+[
+  {
+    "aliases": [
+      "マリオブラザーズサーキット",
+      "マリブラ",
+      "マリブサ",
+      "mbc",
+      "MBC"
+    ],
+    "name": "マリオブラザーズサーキット",
+    "image": "https://media.discordapp.net/attachments/1380075460951670806/1381161437929410671/MBC.png"
+  },
+  {
+    "aliases": [
+      "トロフィーシティ",
+      "トロフィー",
+      "cc",
+      "CC"
+    ],
+    "name": "トロフィーシティ",
+    "image": "https://media.discordapp.net/attachments/1348176200547307550/1381247724749455442/CC.png"
+  },
+  {
+    "aliases": [
+      "シュポポコースター",
+      "シュポポ",
+      "シュポコ",
+      "ws",
+      "WS"
+    ],
+    "name": "シュポポコースター",
+    "image": "https://media.discordapp.net/attachments/1380075460951670806/1381163210119446680/WS.png"
+  },
+  {
+    "aliases": [
+      "DKうちゅうセンター",
+      "うちゅうセンター",
+      "うちゅうせん",
+      "dks",
+      "DKS"
+    ],
+    "name": "DKうちゅうセンター",
+    "image": "https://media.discordapp.net/attachments/1380075460951670806/1381164613860851723/DKS.png"
+  },
+  {
+    "aliases": [
+      "サンサンさばく",
+      "さんさば",
+      "サンさば",
+      "サンサバ",
+      "rdh",
+      "rDH",
+      "dh",
+      "DH"
+    ],
+    "name": "サンサンさばく",
+    "image": "https://media.discordapp.net/attachments/1380075460951670806/1381167880334344223/rDH.png"
+  },
+  {
+    "aliases": [
+      "ヘイホーカーニバル",
+      "ヘイカニ",
+      "ヘイカー",
+      "ｵﾆｮｰ",
+      "rsgb",
+      "rSGB",
+      "sgb",
+      "SGB"
+    ],
+    "name": "ヘイホーカーニバル",
+    "image": "https://media.discordapp.net/attachments/1380075460951670806/1381168621258149968/SGB.png"
+  },
+  {
+    "aliases": [
+      "ワリオスタジアム",
+      "ワリスタ",
+      "rws",
+      "rWS"
+    ],
+    "name": "ワリオスタジアム",
+    "image": "https://media.discordapp.net/attachments/1380075460951670806/1381170819333357709/rWS.png"
+  },
+  {
+    "aliases": [
+      "キラーシップ",
+      "キラシ",
+      "raf",
+      "rAF",
+      "af",
+      "AF"
+    ],
+    "name": "キラーシップ",
+    "image": "https://media.discordapp.net/attachments/1380075460951670806/1381171847856656395/rAF.png"
+  },
+  {
+    "aliases": [
+      "DKスノーマウンテン",
+      "DKスノ",
+      "雪山",
+      "dkp",
+      "DKP"
+    ],
+    "name": "DKスノーマウンテン",
+    "image": "https://media.discordapp.net/attachments/1380075460951670806/1381173080155754608/rDKP.png"
+  },
+  {
+    "aliases": [
+      "ロゼッタてんもんだい",
+      "ロゼてん",
+      "sp",
+      "SP"
+    ],
+    "name": "ロゼッタてんもんだい",
+    "image": "https://media.discordapp.net/attachments/1380075460951670806/1381173870295388201/SP.png"
+  },
+  {
+    "aliases": [
+      "アイスビルディング",
+      "アイス",
+      "rshs",
+      "rSHS",
+      "shs",
+      "SHS"
+    ],
+    "name": "アイス",
+    "image": "https://media.discordapp.net/attachments/1380075460951670806/1381189567071387688/rSHS.png"
+  },
+  {
+    "aliases": [
+      "ワリオシップ",
+      "ワリシ",
+      "rwsh",
+      "rWSh",
+      "wsh",
+      "WSh"
+    ],
+    "name": "ワリオシップ",
+    "image": "https://media.discordapp.net/attachments/1380075460951670806/1381190443357962250/rWSh.png"
+  },
+  {
+    "aliases": [
+      "ノコノコビーチ",
+      "ノコビ",
+      "rktb",
+      "rKTB",
+      "ktb",
+      "KTB"
+    ],
+    "name": "ノコノコビーチ",
+    "image": "https://media.discordapp.net/attachments/1380075460951670806/1381191808465240094/rKTB.png"
+  },
+  {
+    "aliases": [
+      "リバーサイドサファリ",
+      "リバサ",
+      "サファリ",
+      "fo",
+      "FO"
+    ],
+    "name": "リバーサイドサファリ",
+    "image": "https://media.discordapp.net/attachments/1348176200547307550/1381198184185069658/FC.png"
+  },
+  {
+    "aliases": [
+      "ピーチスタジアム",
+      "ピースタ",
+      "ピチスタ",
+      "ps",
+      "PS"
+    ],
+    "name": "https",
+    "image": "//media.discordapp.net/attachments/1348176200547307550/1381247724082565242/PS.png"
+  },
+  {
+    "aliases": [
+      "ピーチビーチ",
+      "ビーチ",
+      "ピチビ",
+      "rpb",
+      "rPB",
+      "pb",
+      "PB"
+    ],
+    "name": "ピーチビーチ",
+    "image": "https://media.discordapp.net/attachments/1348176200547307550/1381247461284253849/rPB.png"
+  },
+  {
+    "aliases": [
+      "ソルティータウン",
+      "ソルティー",
+      "ソルタ",
+      "sss",
+      "SSS"
+    ],
+    "name": "ソルティータウン",
+    "image": "https://media.discordapp.net/attachments/1348176200547307550/1381248485650862091/SSS.png"
+  },
+  {
+    "aliases": [
+      "ディノディノジャングル",
+      "ジャングル",
+      "ディノディノ",
+      "rddj",
+      "rDDJ",
+      "ddj",
+      "DDJ"
+    ],
+    "name": "ディノディノジャングル",
+    "image": "https://media.discordapp.net/attachments/1380075460951670806/1381250188789944433/rDDJ.png"
+  },
+  {
+    "aliases": [
+      "ハテナしんでん",
+      "ハテしん",
+      "はてしん",
+      "しんでん",
+      "gbr",
+      "GBR"
+    ],
+    "name": "ハテナしんでん",
+    "image": "https://media.discordapp.net/attachments/1380075460951670806/1381251170605203648/GBR.png"
+  },
+  {
+    "aliases": [
+      "プクプクフォールズ",
+      "プクプク",
+      "プクフォ",
+      "ccf",
+      "CCF"
+    ],
+    "name": "プクプクフォールズ",
+    "image": "https://media.discordapp.net/attachments/1380075460951670806/1381252657632772116/CCF.png"
+  },
+  {
+    "aliases": [
+      "ショーニューロード",
+      "ショーニュー",
+      "ショーロ",
+      "dd",
+      "DD"
+    ],
+    "name": "ショーニューロード",
+    "image": "https://media.discordapp.net/attachments/1380075460951670806/1381253324321329233/DD.png"
+  },
+  {
+    "aliases": [
+      "おばけシネマ",
+      "ばけシネ",
+      "シネマ",
+      "bci",
+      "BCi"
+    ],
+    "name": "おばけシネマ",
+    "image": "https://media.discordapp.net/attachments/1380075460951670806/1381254139048366170/BCi.png"
+  },
+  {
+    "aliases": [
+      "ホネホネツイスター",
+      "ホネホネ",
+      "dbb",
+      "DBB"
+    ],
+    "name": "ホネホネツイスター",
+    "image": "https://media.discordapp.net/attachments/1380075460951670806/1381254759578861588/DBB.png"
+  },
+  {
+    "aliases": [
+      "モーモーカントリー",
+      "モモカン",
+      "rmmm",
+      "rMMM",
+      "mmm",
+      "MMM"
+    ],
+    "name": "モーモーカントリー",
+    "image": "https://media.discordapp.net/attachments/1380075460951670806/1381255849300852787/rMMM.png"
+  },
+  {
+    "aliases": [
+      "チョコマウンテン",
+      "チョコマ",
+      "rcm",
+      "rCM",
+      "cm",
+      "CM"
+    ],
+    "name": "チョコマウンテン",
+    "image": "https://media.discordapp.net/attachments/1380075460951670806/1381256980433469450/rCM.png"
+  },
+  {
+    "aliases": [
+      "キノピオファクトリー",
+      "工場",
+      "rtf",
+      "rTF",
+      "tf",
+      "TF"
+    ],
+    "name": "キノピオファクトリー",
+    "image": "https://media.discordapp.net/attachments/1380075460951670806/1381257583788294184/rTF.png"
+  },
+  {
+    "aliases": [
+      "クッパキャッスル",
+      "クパキャ",
+      "bc",
+      "BC"
+    ],
+    "name": "クッパキャッスル",
+    "image": "https://media.discordapp.net/attachments/1380075460951670806/1381258520732631132/BC.png"
+  },
+  {
+    "aliases": [
+      "どんぐりツリーハウス",
+      "どんぐり",
+      "ah",
+      "AH"
+    ],
+    "name": "どんぐりツリーハウス",
+    "image": "https://media.discordapp.net/attachments/1380075460951670806/1381259707007766659/AH.png"
+  },
+  {
+    "aliases": [
+      "マリオサーキット",
+      "マリサ",
+      "mc",
+      "MC"
+    ],
+    "name": "マリオサーキット",
+    "image": "https://media.discordapp.net/attachments/1380075460951670806/1381260478189408390/MC.png"
+  },
+  {
+    "aliases": [
+      "レインボーロード",
+      "虹",
+      "rr",
+      "RR"
+    ],
+    "name": "レインボーロード",
+    "image": "https://media.discordapp.net/attachments/1380075460951670806/1381261604254908437/RR.png"
+  }
+]
