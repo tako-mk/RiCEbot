@@ -120,6 +120,13 @@ class Handraise(commands.Cog):
         view = HourButtonView(interaction.guild)
         await interaction.response.send_message(embed=embed, view=view)
 
+    @app_commands.command(name="now")
+    async def now(self, interaction: discord.Interaction):
+        """現在の挙手状況を確認"""
+        embed = await build_embed(interaction.guild)
+        view = HourButtonView(interaction.guild)
+        await interaction.response.send_message(embed=embed, view=view)
+
     @app_commands.command(name="can")
     async def can_hour(
         self,
@@ -208,3 +215,4 @@ class Handraise(commands.Cog):
 
 async def setup(bot):
     await bot.add_cog(Handraise(bot))
+
