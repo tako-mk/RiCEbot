@@ -1,6 +1,19 @@
 import os
 import discord
 from discord.ext import commands
+import threading
+from http.server import HTTPServer, BaseHTTPRequestHandler
+
+class Handler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.end_headers()
+        self.wfile.write(b"OK")
+
+def run_server():
+    server = HTTPServer(("0.0.0.0", 8000), Handler)
+    server.serve_forever()
+
 
 # -----------------------
 # Bot クラス定義
@@ -48,6 +61,8 @@ async def on_ready():
 # -----------------------
 # 実行
 # -----------------------
+# Discord Bot を起動する前にスレッドで HTTP サーバーを起動
+threading.Thread(target=run_server, daemon=True).start()
 TOKEN = os.environ.get("DISCORD_BOT_TOKEN")
 if not TOKEN:
     raise ValueError("DISCORD_BOT_TOKEN が環境変数に設定されていません")
