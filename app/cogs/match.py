@@ -76,7 +76,7 @@ class Match(commands.Cog):
         # 1試合1レコードに変更
         cursor.execute("""
         INSERT INTO result_a
-        (players, my_point, enemy1, point1, enemy2, point2, enemy3, point3, rank, date)
+        (player, my_point, enemy1, point1, enemy2, point2, enemy3, point3, rank, date)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
             players_text, mypoint, enemy1, point1, enemy2, point2, enemy3, point3,
@@ -132,7 +132,7 @@ class Match(commands.Cog):
 
         cursor.execute("""
         INSERT INTO result_b
-        (players, my_point, enemy, enemy_point, rank, date)
+        (player, my_point, enemy, enemy_point, rank, date)
         VALUES (?, ?, ?, ?, ?, ?)
         """, (
             players_text, mypoint, enemy, enemy_point,
@@ -298,3 +298,4 @@ class Match(commands.Cog):
 
 async def setup(bot):
     await bot.add_cog(Match(bot))
+
