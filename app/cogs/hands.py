@@ -120,50 +120,57 @@ class Handraise(commands.Cog):
         view = HourButtonView(interaction.guild)
         await interaction.response.send_message(embed=embed, view=view)
 
-    @app_commands.command(name="now")
-    async def now(self, interaction: discord.Interaction):
-        """現在の挙手状況を確認"""
-        embed = await build_embed(interaction.guild)
-        view = HourButtonView(interaction.guild)
-        await interaction.response.send_message(embed=embed, view=view)
-
     @app_commands.command(name="can")
-    async def can_hour(self, interaction: discord.Interaction, hour: str):
-        """交流戦への挙手"""
+    async def can_hour(
+        self,
+        interaction: discord.Interaction,
+        hour: str,
+        name: discord.Member | None = None
+    ):
+        """交流戦への挙手（自分 or 指定ユーザー）"""
         hours = load_hours()
         if hour not in hours:
             await interaction.response.send_message("そのhourはありません。", ephemeral=True)
             return
         
         role = interaction.guild.get_role(hours[hour])
-        member = interaction.user
 
-        if role in member.roles:
-            msg = f"{hour} 時には既に登録されています。"
+        # 対象ユーザー（name があればその人、なければ実行者）
+        target = name or interaction.user
+
+        if role in target.roles:
+            msg = f"{target.mention} は {hour} 時に既に登録されています。"
         else:
-            await member.add_roles(role)
-            msg = f"{hour} 時に挙手しました。"
+            await target.add_roles(role)
+            msg = f"{target.mention} を {hour} 時に挙手させました。"
 
         embed = await build_embed(interaction.guild)
         view = HourButtonView(interaction.guild)
         await interaction.response.send_message(msg, embed=embed, view=view)
 
     @app_commands.command(name="drop")
-    async def drop_hour(self, interaction: discord.Interaction, hour: str):
-        """挙手の取り消し"""
+    async def drop_hour(
+        self,
+        interaction: discord.Interaction,
+        hour: str,
+        name: discord.Member | None = None
+    ):
+        """交流戦の挙手取り下げ（自分 or 指定ユーザー）"""
         hours = load_hours()
         if hour not in hours:
             await interaction.response.send_message("そのhourはありません。", ephemeral=True)
             return
         
         role = interaction.guild.get_role(hours[hour])
-        member = interaction.user
 
-        if role in member.roles:
-            await member.remove_roles(role)
-            msg = f"{hour} 時の挙手を取り消しました。"
+        # 対象ユーザー（name があればその人、なければ実行者）
+        target = name or interaction.user
+
+        if role not in target.roles:
+            msg = f"{target.mention} は {hour} 時に登録されていません。"
         else:
-            msg = f"{hour} 時には登録されていません。"
+            await target.remove_roles(role)
+            msg = f"{target.mention} の {hour} 時の挙手を取り下げました。"
 
         embed = await build_embed(interaction.guild)
         view = HourButtonView(interaction.guild)
