@@ -14,4 +14,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # 起動コマンド
-CMD ["python", "bot.py"]
+CMD ["python", "RiCEbot/bot.py"]
