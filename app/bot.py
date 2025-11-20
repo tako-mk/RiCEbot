@@ -13,16 +13,10 @@ class MyBot(commands.Bot):
         )
 
     async def setup_hook(self):
-        # -----------------------
-        # Cog のロード
-        # -----------------------
         for filename in os.listdir("./cogs"):
             if filename.endswith(".py") and filename != "__init__.py":
                 await self.load_extension(f"cogs.{filename[:-3]}")
 
-        # -----------------------
-        # 永続ビューの再登録
-        # -----------------------
         try:
             from cogs.hands import HourButtonView, load_hours
         except ImportError:
@@ -47,7 +41,6 @@ bot = MyBot()
 @bot.event
 async def on_ready():
     print(f"✅ ログイン成功: {bot.user}")
-    # slash コマンドを Discord に同期
     await bot.tree.sync()
     print("✅ スラッシュコマンド同期完了")
 
@@ -55,4 +48,7 @@ async def on_ready():
 # -----------------------
 # 実行
 # -----------------------
-bot.run("DISCORD_BOT_TOKEN")
+TOKEN = os.environ.get("DISCORD_BOT_TOKEN")
+if not TOKEN:
+    raise ValueError("DISCORD_BOT_TOKEN が環境変数に設定されていません")
+bot.run(TOKEN)
