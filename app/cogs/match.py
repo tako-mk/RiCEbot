@@ -207,7 +207,7 @@ class Match(commands.Cog):
             for row in rows[i:i+15]:
                 rid = row["result_id"]
                 date = row["date"]
-                players = row["players"]
+                players = row["player"]
                 rank = row["rank"]
 
                 if type == "a":
@@ -298,4 +298,5 @@ class Match(commands.Cog):
 
 async def setup(bot):
     await bot.add_cog(Match(bot))
+
 
