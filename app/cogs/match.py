@@ -62,7 +62,10 @@ class Match(commands.Cog):
             await interaction.response.send_message("ロールにメンバーがいません。", ephemeral=True)
             return
 
-        # rank算出用
+        # メンバーを文字列化
+        players_text = ",".join([m.name for m in members])
+
+        # 順位計算
         scores = [mypoint, point1, point2, point3]
         sorted_scores = sorted(scores, reverse=True)
         my_rank = sorted_scores.index(mypoint) + 1
@@ -70,31 +73,31 @@ class Match(commands.Cog):
         conn = get_conn()
         cursor = conn.cursor()
 
-        embeds = []
-
-        for member in members:
-            cursor.execute("""
-            INSERT INTO result_a 
-            (player, my_point, enemy1, point1, enemy2, point2, enemy3, point3, rank, date)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, (member.name, mypoint, enemy1, point1, enemy2, point2, enemy3, point3, my_rank, f"{date}{hour}"))
-
-            # Embed作成用
-            embed = discord.Embed(title="リザルト登録完了", color=0x1abc9c)
-            embed.add_field(name="日時", value=f"{date} {hour}時")
-            embed.add_field(name="メンバー", value=f"{member.name}")
-            embed.add_field(name="得点", value=mypoint)
-            embed.add_field(name="敵1", value=f"{enemy1}: {point1}")
-            embed.add_field(name="敵2", value=f"{enemy2}: {point2}")
-            embed.add_field(name="敵3", value=f"{enemy3}: {point3}")
-            embed.add_field(name="順位", value=f"{my_rank}位")
-            embeds.append(embed)
+        # 1試合1レコードに変更
+        cursor.execute("""
+        INSERT INTO result_a
+        (players, my_point, enemy1, point1, enemy2, point2, enemy3, point3, rank, date)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            players_text, mypoint, enemy1, point1, enemy2, point2, enemy3, point3,
+            my_rank, f"{date}{hour}"
+        ))
 
         conn.commit()
         conn.close()
 
-        # 最初のEmbedを送信、必要なら後で複数Embedをページ送り表示する
-        await interaction.response.send_message(embeds=embeds)
+        # Embed（1つだけ）
+        embed = discord.Embed(title="リザルト登録完了", color=0x1abc9c)
+        embed.add_field(name="日時", value=f"{date} {hour}時")
+        embed.add_field(name="メンバー", value=players_text)
+        embed.add_field(name="得点", value=mypoint)
+        embed.add_field(name="敵1", value=f"{enemy1}: {point1}")
+        embed.add_field(name="敵2", value=f"{enemy2}: {point2}")
+        embed.add_field(name="敵3", value=f"{enemy3}: {point3}")
+        embed.add_field(name="順位", value=f"{my_rank}位")
+
+        await interaction.response.send_message(embed=embed)
+
 
     # /register_b コマンド（2チーム戦）
     @app_commands.command(name="register_b")
@@ -117,32 +120,36 @@ class Match(commands.Cog):
             await interaction.response.send_message("ロールにメンバーがいません。", ephemeral=True)
             return
 
-        # rank算出
+        # メンバーまとめ
+        players_text = ",".join([m.name for m in members])
+
+        # 順位算出
         scores = [mypoint, enemy_point]
         my_rank = sorted(scores, reverse=True).index(mypoint) + 1
 
         conn = get_conn()
         cursor = conn.cursor()
-        embeds = []
 
-        for member in members:
-            cursor.execute("""
-            INSERT INTO result_b
-            (player, my_point, enemy, enemy_point, rank, date)
-            VALUES (?, ?, ?, ?, ?, ?)
-            """, (member.name, mypoint, enemy, enemy_point, my_rank, f"{date}{hour}"))
-
-            embed = discord.Embed(title="リザルト登録完了", color=0x1abc9c)
-            embed.add_field(name="日時", value=f"{date} {hour}時")
-            embed.add_field(name="メンバー", value=member.name)
-            embed.add_field(name="得点", value=mypoint)
-            embed.add_field(name="敵", value=f"{enemy}: {enemy_point}")
-            embed.add_field(name="順位", value=f"{my_rank}位")
-            embeds.append(embed)
+        cursor.execute("""
+        INSERT INTO result_b
+        (players, my_point, enemy, enemy_point, rank, date)
+        VALUES (?, ?, ?, ?, ?, ?)
+        """, (
+            players_text, mypoint, enemy, enemy_point,
+            my_rank, f"{date}{hour}"
+        ))
 
         conn.commit()
         conn.close()
-        await interaction.response.send_message(embeds=embeds)
+
+        embed = discord.Embed(title="リザルト登録完了", color=0x1abc9c)
+        embed.add_field(name="日時", value=f"{date} {hour}時")
+        embed.add_field(name="メンバー", value=players_text)
+        embed.add_field(name="得点", value=mypoint)
+        embed.add_field(name="敵", value=f"{enemy}: {enemy_point}")
+        embed.add_field(name="順位", value=f"{my_rank}位")
+
+        await interaction.response.send_message(embed=embed)
 
     # /result_list コマンド
     @app_commands.command(name="result_list")
@@ -157,54 +164,81 @@ class Match(commands.Cog):
             await interaction.response.send_message("typeは a または b で指定してください。", ephemeral=True)
             return
 
+        table = "result_a" if type == "a" else "result_b"
+
         conn = get_conn()
+        conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
 
-        table = "result_a" if type == "a" else "result_b"
         if enemy:
-            cursor.execute(f"SELECT * FROM {table} WHERE enemy1=? OR enemy2=? OR enemy3=? OR enemy=?", (enemy, enemy, enemy, enemy))
-            rows = cursor.fetchall()
+            # a の時は敵1/2/3 にヒット
+            if type == "a":
+                cursor.execute(f"""
+                    SELECT * FROM {table}
+                    WHERE enemy1=? OR enemy2=? OR enemy3=?
+                """, (enemy, enemy, enemy))
+            else:
+                cursor.execute(f"""
+                    SELECT * FROM {table}
+                    WHERE enemy=?
+                """, (enemy,))
         else:
             cursor.execute(f"SELECT * FROM {table}")
-            rows = cursor.fetchall()
+
+        rows = cursor.fetchall()
         conn.close()
 
         if not rows:
             await interaction.response.send_message("該当する結果はありません。", ephemeral=True)
             return
-        
+
         # 順位集計
         rank_counts = {}
         for row in rows:
-            rank = row[9] if type == "a" else row[5]
-            rank_counts[rank] = rank_counts.get(rank, 0) + 1
+            r = row["rank"]
+            rank_counts[r] = rank_counts.get(r, 0) + 1
         total_matches = len(rows)
 
-        # Embedページング（1ページ15件）
+        # Embedページング（15件ずつ）
         embeds = []
         for i in range(0, len(rows), 15):
             embed = discord.Embed(title="結果一覧", color=0x3498db)
+
             for row in rows[i:i+15]:
-                result_id = row[0]
+                rid = row["result_id"]
+                date = row["date"]
+                players = row["players"]
+                rank = row["rank"]
+
                 if type == "a":
-                    embed.add_field(
-                        name=f"ID:{result_id} 日時: {row[10]}",
-                        value=f"順位:{row[9]}位 \n メンバー: {row[1]} \n {row[2]}pt / {row[3]}: {row[4]}pt / {row[5]}: {row[6]}pt / {row[7]}: {row[8]}pt",
-                        inline=False
+                    text = (
+                        f"メンバー: {players}\n"
+                        f"自チーム: {row['my_point']}pt\n"
+                        f"{row['enemy1']}: {row['point1']}pt\n"
+                        f"{row['enemy2']}: {row['point2']}pt\n"
+                        f"{row['enemy3']}: {row['point3']}pt\n"
+                        f"順位: {rank}位"
                     )
                 else:
-                    embed.add_field(
-                        name=f"ID:{result_id} 日時: {row[6]}",
-                        value=f"順位:{row[5]}位 \n メンバー: {row[1]} \n {row[2]}pt / {row[3]}: {row[4]}pt",
-                        inline=False
+                    text = (
+                        f"メンバー: {players}\n"
+                        f"自チーム: {row['my_point']}pt\n"
+                        f"{row['enemy']}: {row['enemy_point']}pt\n"
+                        f"順位: {rank}位"
                     )
+
+                embed.add_field(
+                    name=f"ID:{rid} | 日時: {date}",
+                    value=text,
+                    inline=False
+                )
+
             rank_text = "\n".join([f"{k}位: {v}回" for k, v in sorted(rank_counts.items())])
             embed.add_field(name=f"合計試合数: {total_matches}", value=rank_text, inline=False)
             embeds.append(embed)
 
         view = ResultListView(embeds)
         await interaction.response.send_message(embed=embeds[0], view=view)
-
 
     # /result_edit コマンド
     @app_commands.command(name="result_edit")
@@ -221,21 +255,23 @@ class Match(commands.Cog):
             await interaction.response.send_message("typeは a または b で指定してください。", ephemeral=True)
             return
 
-        conn = get_conn()
-        cursor = conn.cursor()
         table = "result_a" if type == "a" else "result_b"
 
-        # カラムチェック
+        conn = get_conn()
+        cursor = conn.cursor()
+
         cursor.execute(f"PRAGMA table_info({table})")
         columns = [c[1] for c in cursor.fetchall()]
+
         if target not in columns:
-            await interaction.response.send_message(f"{target} は存在しません。", ephemeral=True)
             conn.close()
+            await interaction.response.send_message(f"{target} は存在しません。", ephemeral=True)
             return
 
         cursor.execute(f"UPDATE {table} SET {target}=? WHERE result_id=?", (set, result_id))
         conn.commit()
         conn.close()
+
         await interaction.response.send_message(f"✅ {result_id} の {target} を {set} に更新しました。")
 
     # /result_delete コマンド
