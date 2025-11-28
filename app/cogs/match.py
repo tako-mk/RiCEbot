@@ -1,11 +1,14 @@
 import os
-import asyncpg
 import discord
 from discord import app_commands
 from discord.ui import View, Button
 from discord.ext import commands
+from supabase import create_client
 
-DATABASE_URL = os.getenv("DATABASE_URL")  # Supabase URL
+DATABASE_URL = os.getenv("DATABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY")  # 公開用APIキーかサービスキー
+supabase = create_client(DATABASE_URL, SUPABASE_KEY)
+
 
 class ResultListView(View):
     def __init__(self, embeds):
@@ -33,10 +36,6 @@ class ResultListView(View):
             await interaction.response.defer()
 
 
-async def get_conn():
-    return await asyncpg.connect(DATABASE_URL)
-
-
 class Match(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -51,7 +50,6 @@ class Match(commands.Cog):
         enemy3: str, point3: int,
         date: str
     ):
-        """4チーム戦の結果を登録"""
         role = discord.utils.get(interaction.guild.roles, name=f"{hour}h")
         if not role or not role.members:
             await interaction.response.send_message("そのhourにメンバーがいません。", ephemeral=True)
@@ -62,15 +60,18 @@ class Match(commands.Cog):
         my_rank = sorted(scores, reverse=True).index(mypoint) + 1
         datetime_str = f"{date} {hour}:00"
 
-        conn = await get_conn()
-        try:
-            await conn.execute("""
-                INSERT INTO result_a
-                (player, my_point, enemy1, point1, enemy2, point2, enemy3, point3, rank, date)
-                VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
-            """, players_text, mypoint, enemy1, point1, enemy2, point2, enemy3, point3, my_rank, datetime_str)
-        finally:
-            await conn.close()
+        supabase.table("result_a").insert({
+            "player": players_text,
+            "my_point": mypoint,
+            "enemy1": enemy1,
+            "point1": point1,
+            "enemy2": enemy2,
+            "point2": point2,
+            "enemy3": enemy3,
+            "point3": point3,
+            "rank": my_rank,
+            "date": datetime_str
+        }).execute()
 
         embed = discord.Embed(title="リザルト登録完了", color=0x1abc9c)
         embed.add_field(name="日時", value=datetime_str)
@@ -91,7 +92,6 @@ class Match(commands.Cog):
         enemy_point: int,
         date: str
     ):
-        """2チーム戦の結果を登録"""
         role = discord.utils.get(interaction.guild.roles, name=f"{hour}h")
         if not role or not role.members:
             await interaction.response.send_message("そのhourにメンバーがいません。", ephemeral=True)
@@ -102,15 +102,14 @@ class Match(commands.Cog):
         my_rank = sorted(scores, reverse=True).index(mypoint) + 1
         datetime_str = f"{date} {hour}:00"
 
-        conn = await get_conn()
-        try:
-            await conn.execute("""
-                INSERT INTO result_b
-                (player, my_point, enemy, enemy_point, rank, date)
-                VALUES ($1,$2,$3,$4,$5,$6)
-            """, players_text, mypoint, enemy, enemy_point, my_rank, datetime_str)
-        finally:
-            await conn.close()
+        supabase.table("result_b").insert({
+            "player": players_text,
+            "my_point": mypoint,
+            "enemy": enemy,
+            "enemy_point": enemy_point,
+            "rank": my_rank,
+            "date": datetime_str
+        }).execute()
 
         embed = discord.Embed(title="リザルト登録完了", color=0x1abc9c)
         embed.add_field(name="日時", value=datetime_str)
@@ -132,19 +131,16 @@ class Match(commands.Cog):
             return
 
         table = "result_a" if type == "a" else "result_b"
-        conn = await get_conn()
-        try:
-            if enemy:
-                if type == "a":
-                    rows = await conn.fetch(f"""
-                        SELECT * FROM {table} WHERE enemy1=$1 OR enemy2=$1 OR enemy3=$1
-                    """, enemy)
-                else:
-                    rows = await conn.fetch(f"SELECT * FROM {table} WHERE enemy=$1", enemy)
+
+        if enemy:
+            if type == "a":
+                rows = supabase.table(table).select("*").or_(
+                    f"enemy1.eq.{enemy},enemy2.eq.{enemy},enemy3.eq.{enemy}"
+                ).execute().data
             else:
-                rows = await conn.fetch(f"SELECT * FROM {table}")
-        finally:
-            await conn.close()
+                rows = supabase.table(table).select("*").eq("enemy", enemy).execute().data
+        else:
+            rows = supabase.table(table).select("*").execute().data
 
         if not rows:
             await interaction.response.send_message("該当する結果はありません。", ephemeral=True)
@@ -179,6 +175,7 @@ class Match(commands.Cog):
 
         view = ResultListView(embeds)
         await interaction.response.send_message(embed=embeds[0], view=view)
+
 
 async def setup(bot):
     await bot.add_cog(Match(bot))
