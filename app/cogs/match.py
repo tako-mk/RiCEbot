@@ -5,7 +5,7 @@ from discord import app_commands
 from discord.ui import View, Button
 from discord.ext import commands
 
-DATABASE_URL = os.getenv("DATABASE_URL")  # Supabase URL koyeb環境変数設定
+DATABASE_URL = os.getenv("DATABASE_URL")  # Supabase URL
 
 class ResultListView(View):
     def __init__(self, embeds):
@@ -32,8 +32,10 @@ class ResultListView(View):
         else:
             await interaction.response.defer()
 
+
 async def get_conn():
     return await asyncpg.connect(DATABASE_URL)
+
 
 class Match(commands.Cog):
     def __init__(self, bot):
@@ -58,17 +60,20 @@ class Match(commands.Cog):
         players_text = ",".join([m.name for m in role.members])
         scores = [mypoint, point1, point2, point3]
         my_rank = sorted(scores, reverse=True).index(mypoint) + 1
+        datetime_str = f"{date} {hour}:00"
 
         conn = await get_conn()
-        await conn.execute("""
-            INSERT INTO result_a
-            (player, my_point, enemy1, point1, enemy2, point2, enemy3, point3, rank, date)
-            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
-        """, players_text, mypoint, enemy1, point1, enemy2, point2, enemy3, point3, my_rank, f"{date}{hour}")
-        await conn.close()
+        try:
+            await conn.execute("""
+                INSERT INTO result_a
+                (player, my_point, enemy1, point1, enemy2, point2, enemy3, point3, rank, date)
+                VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+            """, players_text, mypoint, enemy1, point1, enemy2, point2, enemy3, point3, my_rank, datetime_str)
+        finally:
+            await conn.close()
 
         embed = discord.Embed(title="リザルト登録完了", color=0x1abc9c)
-        embed.add_field(name="日時", value=f"{date} {hour}時")
+        embed.add_field(name="日時", value=datetime_str)
         embed.add_field(name="メンバー", value=players_text)
         embed.add_field(name="得点", value=mypoint)
         embed.add_field(name="敵1", value=f"{enemy1}: {point1}")
@@ -95,17 +100,20 @@ class Match(commands.Cog):
         players_text = ",".join([m.name for m in role.members])
         scores = [mypoint, enemy_point]
         my_rank = sorted(scores, reverse=True).index(mypoint) + 1
+        datetime_str = f"{date} {hour}:00"
 
         conn = await get_conn()
-        await conn.execute("""
-            INSERT INTO result_b
-            (player, my_point, enemy, enemy_point, rank, date)
-            VALUES ($1,$2,$3,$4,$5,$6)
-        """, players_text, mypoint, enemy, enemy_point, my_rank, f"{date}{hour}")
-        await conn.close()
+        try:
+            await conn.execute("""
+                INSERT INTO result_b
+                (player, my_point, enemy, enemy_point, rank, date)
+                VALUES ($1,$2,$3,$4,$5,$6)
+            """, players_text, mypoint, enemy, enemy_point, my_rank, datetime_str)
+        finally:
+            await conn.close()
 
         embed = discord.Embed(title="リザルト登録完了", color=0x1abc9c)
-        embed.add_field(name="日時", value=f"{date} {hour}時")
+        embed.add_field(name="日時", value=datetime_str)
         embed.add_field(name="メンバー", value=players_text)
         embed.add_field(name="得点", value=mypoint)
         embed.add_field(name="敵", value=f"{enemy}: {enemy_point}")
@@ -119,41 +127,40 @@ class Match(commands.Cog):
         enemy: str = None,
     ):
         type = type.lower()
-        if type not in ("a","b"):
+        if type not in ("a", "b"):
             await interaction.response.send_message("typeは a/b で指定してください", ephemeral=True)
             return
 
-        table = "result_a" if type=="a" else "result_b"
+        table = "result_a" if type == "a" else "result_b"
         conn = await get_conn()
-
-        if enemy:
-            if type=="a":
-                rows = await conn.fetch(f"""
-                    SELECT * FROM {table} WHERE enemy1=$1 OR enemy2=$1 OR enemy3=$1
-                """, enemy)
+        try:
+            if enemy:
+                if type == "a":
+                    rows = await conn.fetch(f"""
+                        SELECT * FROM {table} WHERE enemy1=$1 OR enemy2=$1 OR enemy3=$1
+                    """, enemy)
+                else:
+                    rows = await conn.fetch(f"SELECT * FROM {table} WHERE enemy=$1", enemy)
             else:
-                rows = await conn.fetch(f"SELECT * FROM {table} WHERE enemy=$1", enemy)
-        else:
-            rows = await conn.fetch(f"SELECT * FROM {table}")
-
-        await conn.close()
+                rows = await conn.fetch(f"SELECT * FROM {table}")
+        finally:
+            await conn.close()
 
         if not rows:
             await interaction.response.send_message("該当する結果はありません。", ephemeral=True)
             return
 
-        # 順位集計
         rank_counts = {}
         for row in rows:
             r = row["rank"]
-            rank_counts[r] = rank_counts.get(r,0)+1
+            rank_counts[r] = rank_counts.get(r, 0) + 1
         total_matches = len(rows)
 
         embeds = []
-        for i in range(0,len(rows),15):
+        for i in range(0, len(rows), 15):
             embed = discord.Embed(title="結果一覧", color=0x3498db)
-            for row in rows[i:i+15]:
-                if type=="a":
+            for row in rows[i:i + 15]:
+                if type == "a":
                     text = (f"メンバー: {row['player']}\n"
                             f"自チーム: {row['my_point']}pt\n"
                             f"{row['enemy1']}: {row['point1']}pt\n"
@@ -163,61 +170,15 @@ class Match(commands.Cog):
                 else:
                     text = (f"メンバー: {row['player']}\n"
                             f"自チーム: {row['my_point']}pt\n"
-                            f"{row['enemy']}: {row['enemy_point']}pt\n"
+                            f"敵: {row['enemy']} {row['enemy_point']}pt\n"
                             f"順位: {row['rank']}位")
                 embed.add_field(name=f"ID:{row['result_id']} | 日時: {row['date']}", value=text, inline=False)
-            rank_text = "\n".join([f"{k}位: {v}回" for k,v in sorted(rank_counts.items())])
+            rank_text = "\n".join([f"{k}位: {v}回" for k, v in sorted(rank_counts.items())])
             embed.add_field(name=f"合計試合数: {total_matches}", value=rank_text, inline=False)
             embeds.append(embed)
 
         view = ResultListView(embeds)
         await interaction.response.send_message(embed=embeds[0], view=view)
-
-    @app_commands.command(name="result_edit")
-    async def result_edit(
-        self, interaction: discord.Interaction,
-        type: str,
-        result_id: int,
-        target: str,
-        set: str
-    ):
-        type = type.lower()
-        if type not in ("a","b"):
-            await interaction.response.send_message("typeは a/b で指定してください", ephemeral=True)
-            return
-
-        table = "result_a" if type=="a" else "result_b"
-        conn = await get_conn()
-        columns = [r["column_name"] for r in await conn.fetch(f"""
-            SELECT column_name FROM information_schema.columns WHERE table_name=$1
-        """, table)]
-
-        if target not in columns:
-            await conn.close()
-            await interaction.response.send_message(f"{target} は存在しません。", ephemeral=True)
-            return
-
-        await conn.execute(f"UPDATE {table} SET {target}=$1 WHERE result_id=$2", set, result_id)
-        await conn.close()
-        await interaction.response.send_message(f"✅ {result_id} の {target} を {set} に更新しました。")
-
-    @app_commands.command(name="result_delete")
-    async def result_delete(
-        self, interaction: discord.Interaction,
-        type: str,
-        result_id: int
-    ):
-        type = type.lower()
-        if type not in ("a","b"):
-            await interaction.response.send_message("typeは a/b で指定してください", ephemeral=True)
-            return
-
-        table = "result_a" if type=="a" else "result_b"
-        conn = await get_conn()
-        await conn.execute(f"DELETE FROM {table} WHERE result_id=$1", result_id)
-        await conn.close()
-        await interaction.response.send_message(f"✅ {result_id} を削除しました。")
-
 
 async def setup(bot):
     await bot.add_cog(Match(bot))
