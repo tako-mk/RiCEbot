@@ -5,8 +5,9 @@ import os
 import json
 from supabase import create_client
 
-DATABASE_URL = os.getenv("DATABASE_URL")  # Supabase URL
-supabase = create_client(DATABASE_URL, "")
+DATABASE_URL = os.getenv("DATABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY")  # 公開用APIキーかサービスキー
+supabase = create_client(DATABASE_URL, SUPABASE_KEY)
 
 HOUR_JSON = os.path.join(os.path.dirname(__file__), "..", "hours.json")
 
