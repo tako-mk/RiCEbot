@@ -81,6 +81,17 @@ class HourButton(Button):
 
         await interaction.response.edit_message(embed=embed, view=view)
 
+# ===== チャンネル内最後の挙手Embedを編集 =====
+async def edit_last_hour_message(channel: discord.TextChannel, guild: discord.Guild):
+    """チャンネル内で最後に送信された挙手Embedを編集（contentは消す）"""
+    async for msg in channel.history(limit=50):
+        if msg.author == guild.me and msg.embeds:
+            embed = await build_embed(guild)
+            view = HourButtonView(guild)
+            # content=None で前のテキストを消す
+            await msg.edit(content=None, embed=embed, view=view)
+            break
+
 # スラッシュコマンド
 class Handraise(commands.Cog):
     def __init__(self, bot):
@@ -141,19 +152,17 @@ class Handraise(commands.Cog):
             return
         
         role = interaction.guild.get_role(hours[hour])
-
-        # 対象ユーザー（name があればその人、なければ実行者）
         target = name or interaction.user
-
+    
         if role in target.roles:
             msg = f"{target.mention} は {hour} 時に既に登録されています。"
         else:
             await target.add_roles(role)
             msg = f"{target.mention} を {hour} 時に挙手させました。"
-
-        embed = await build_embed(interaction.guild)
-        view = HourButtonView(interaction.guild)
-        await interaction.response.send_message(msg, embed=embed, view=view)
+    
+        # 最後の挙手Embedを更新
+        await edit_last_hour_message(interaction.channel, interaction.guild)
+        await interaction.response.send_message(msg, ephemeral=True)
 
     @app_commands.command(name="drop")
     async def drop_hour(
@@ -169,19 +178,17 @@ class Handraise(commands.Cog):
             return
         
         role = interaction.guild.get_role(hours[hour])
-
-        # 対象ユーザー（name があればその人、なければ実行者）
         target = name or interaction.user
-
+    
         if role not in target.roles:
             msg = f"{target.mention} は {hour} 時に登録されていません。"
         else:
             await target.remove_roles(role)
             msg = f"{target.mention} の {hour} 時の挙手を取り下げました。"
-
-        embed = await build_embed(interaction.guild)
-        view = HourButtonView(interaction.guild)
-        await interaction.response.send_message(msg, embed=embed, view=view)
+    
+        # 最後の挙手Embedを更新
+        await edit_last_hour_message(interaction.channel, interaction.guild)
+        await interaction.response.send_message(msg, ephemeral=True)
 
     @app_commands.command(name="clear")
     async def clear_hours(self, interaction: discord.Interaction):
@@ -192,10 +199,12 @@ class Handraise(commands.Cog):
             if role:
                 for member in role.members:
                     await member.remove_roles(role)
-
+    
+        # 新しいEmbedを作り直す
         embed = await build_embed(interaction.guild)
         view = HourButtonView(interaction.guild)
         await interaction.response.send_message("✅ 全ての挙手状況をクリアしました。", embed=embed, view=view)
+
 
     @app_commands.command(name="pick")
     async def pick_hour(self, interaction: discord.Interaction, hour: str):
@@ -215,4 +224,5 @@ class Handraise(commands.Cog):
 
 async def setup(bot):
     await bot.add_cog(Handraise(bot))
+
 
