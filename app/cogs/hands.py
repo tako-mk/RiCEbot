@@ -8,6 +8,7 @@ from discord.ext import commands
 import re
 
 HOUR_JSON = os.path.join(os.path.dirname(__file__), "..", "hours.json")
+MSG_JSON = os.path.join(os.path.dirname(__file__), "..", "handraise_message.json")
 
 # 挙手機能用のhours読み込み関数
 def load_hours():
@@ -44,6 +45,20 @@ async def sync_hours_from_roles(guild: discord.Guild):
 
     save_hours(hours)
 
+def load_message_id():
+    if not os.path.exists(MSG_JSON):
+        return None
+    with open(MSG_JSON, "r", encoding="utf-8") as f:
+        try:
+            return json.load(f).get("message_id")
+        except json.JSONDecodeError:
+            return None
+
+def save_message_id(message_id: int):
+    with open(MSG_JSON, "w", encoding="utf-8") as f:
+        json.dump({"message_id": message_id}, f, indent=2)
+
+
 # Embed生成関数
 async def build_embed(guild: discord.Guild):
     hours = load_hours()
@@ -63,6 +78,24 @@ async def build_embed(guild: discord.Guild):
         embed.add_field(name=f"{hour} 時", value=text, inline=False)
 
     return embed
+
+# Embed更新関数
+async def resend_handraise_embed(channel: discord.TextChannel, guild: discord.Guild):
+    # 旧メッセージ削除
+    old_id = load_message_id()
+    if old_id:
+        try:
+            msg = await channel.fetch_message(old_id)
+            await msg.delete()
+        except discord.NotFound:
+            pass
+
+    # 新しく送信
+    embed = await build_embed(guild)
+    view = HourButtonView(guild)
+    new_msg = await channel.send(embed=embed, view=view)
+
+    save_message_id(new_msg.id)
 
 # Embedの下のボタンの関数
 class HourButtonView(View):
@@ -154,9 +187,8 @@ class Handraise(commands.Cog):
     @app_commands.command(name="now")
     async def now(self, interaction: discord.Interaction):
         """現在の挙手状況を確認"""
-        embed = await build_embed(interaction.guild)
-        view = HourButtonView(interaction.guild)
-        await interaction.response.send_message(embed=embed, view=view)
+        await resend_handraise_embed(interaction.channel, interaction.guild)
+        await interaction.response.send_message("現在の挙手状況を更新しました。", ephemeral=True)
 
     @app_commands.command(name="can")
     async def can_hour(
@@ -181,7 +213,7 @@ class Handraise(commands.Cog):
             msg = f"{target.mention} を {hour} 時に挙手させました。"
     
         # 最後の挙手Embedを更新
-        await edit_last_hour_message(interaction.channel, interaction.guild)
+        await resend_handraise_embed(interaction.channel, interaction.guild)
         await interaction.response.send_message(msg, ephemeral=True)
 
     @app_commands.command(name="drop")
@@ -207,7 +239,7 @@ class Handraise(commands.Cog):
             msg = f"{target.mention} の {hour} 時の挙手を取り下げました。"
     
         # 最後の挙手Embedを更新
-        await edit_last_hour_message(interaction.channel, interaction.guild)
+        await resend_handraise_embed(interaction.channel, interaction.guild)
         await interaction.response.send_message(msg, ephemeral=True)
 
     @app_commands.command(name="clear")
