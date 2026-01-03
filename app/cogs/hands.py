@@ -118,7 +118,7 @@ class HourButton(Button):
         if role is None:
             await interaction.response.send_message("ロールが存在しません。", ephemeral=True)
             return
-        
+
         member = interaction.user
 
         if role in member.roles:
@@ -126,11 +126,11 @@ class HourButton(Button):
         else:
             await member.add_roles(role)
 
-        # Embedを更新
-        embed = await build_embed(interaction.guild)
-        view = HourButtonView(interaction.guild)
+        # Embedを再送で更新
+        await resend_handraise_embed(interaction.channel, interaction.guild)
 
-        await interaction.response.edit_message(embed=embed, view=view)
+        # interaction未応答防止（表示しないACK）
+        await interaction.response.defer(ephemeral=True)
 
 # スラッシュコマンド
 class Handraise(commands.Cog):
