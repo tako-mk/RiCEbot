@@ -123,10 +123,8 @@ class HourButton(Button):
 
         if role in member.roles:
             await member.remove_roles(role)
-            msg = f"{self.hour} 時から **退出** しました。"
         else:
             await member.add_roles(role)
-            msg = f"{self.hour} 時に **参加** しました。"
 
         # Embedを更新
         embed = await build_embed(interaction.guild)
@@ -178,7 +176,6 @@ class Handraise(commands.Cog):
     async def now(self, interaction: discord.Interaction):
         """現在の挙手状況を確認"""
         await resend_handraise_embed(interaction.channel, interaction.guild)
-        await interaction.response.send_message("現在の挙手状況を更新しました。", ephemeral=True)
 
     @app_commands.command(name="can")
     async def can_hour(
