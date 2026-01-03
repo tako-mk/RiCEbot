@@ -118,32 +118,19 @@ class HourButton(Button):
         if role is None:
             await interaction.response.send_message("ロールが存在しません。", ephemeral=True)
             return
-        
+
         member = interaction.user
 
         if role in member.roles:
             await member.remove_roles(role)
-            msg = f"{self.hour} 時から **退出** しました。"
         else:
             await member.add_roles(role)
-            msg = f"{self.hour} 時に **参加** しました。"
 
-        # Embedを更新
-        embed = await build_embed(interaction.guild)
-        view = HourButtonView(interaction.guild)
+        # ボタン操作の応答なし
+        await interaction.response.defer_update()
 
-        await interaction.response.edit_message(embed=embed, view=view)
-
-# ===== チャンネル内最後の挙手Embedを編集 =====
-async def edit_last_hour_message(channel: discord.TextChannel, guild: discord.Guild):
-    """チャンネル内で最後に送信された挙手Embedを編集（contentは消す）"""
-    async for msg in channel.history(limit=50):
-        if msg.author == guild.me and msg.embeds:
-            embed = await build_embed(guild)
-            view = HourButtonView(guild)
-            # content=None で前のテキストを消す
-            await msg.edit(content=None, embed=embed, view=view)
-            break
+        # 挙手Embedを再送信
+        await resend_handraise_embed(interaction.channel, interaction.guild)
 
 # スラッシュコマンド
 class Handraise(commands.Cog):
@@ -187,8 +174,8 @@ class Handraise(commands.Cog):
     @app_commands.command(name="now")
     async def now(self, interaction: discord.Interaction):
         """現在の挙手状況を確認"""
+        await interaction.response.defer(ephemeral=True)
         await resend_handraise_embed(interaction.channel, interaction.guild)
-        await interaction.response.send_message("現在の挙手状況を更新しました。", ephemeral=True)
 
     @app_commands.command(name="can")
     async def can_hour(
