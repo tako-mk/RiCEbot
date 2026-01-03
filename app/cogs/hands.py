@@ -132,7 +132,6 @@ class HourButton(Button):
 
         await interaction.response.edit_message(embed=embed, view=view)
 
-
 # スラッシュコマンド
 class Handraise(commands.Cog):
     def __init__(self, bot):
@@ -176,6 +175,7 @@ class Handraise(commands.Cog):
     async def now(self, interaction: discord.Interaction):
         """現在の挙手状況を確認"""
         await resend_handraise_embed(interaction.channel, interaction.guild)
+        await interaction.response.send_message("現在の挙手状況を更新しました。", ephemeral=True)
 
     @app_commands.command(name="can")
     async def can_hour(
