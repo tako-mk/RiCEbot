@@ -31,13 +31,16 @@ async def sync_hours_from_roles(guild: discord.Guild):
     """
     サーバー内の ○○h ロールを走査して hours.json を再構築する
     """
-    hours = {}
+    temp = {}
 
     for role in guild.roles:
         m = re.fullmatch(r"(\d+)h", role.name)
         if m:
-            hour = m.group(1)
-            hours[hour] = role.id
+            hour = int(m.group(1))   # 数値にする
+            temp[hour] = role.id
+
+    # hour昇順でソートしてdictに戻す
+    hours = {str(hour): role_id for hour, role_id in sorted(temp.items())}
 
     save_hours(hours)
 
