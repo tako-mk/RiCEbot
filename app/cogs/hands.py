@@ -134,16 +134,6 @@ class HourButton(Button):
 
         await interaction.response.edit_message(embed=embed, view=view)
 
-# ===== チャンネル内最後の挙手Embedを編集 =====
-async def edit_last_hour_message(channel: discord.TextChannel, guild: discord.Guild):
-    """チャンネル内で最後に送信された挙手Embedを編集（contentは消す）"""
-    async for msg in channel.history(limit=50):
-        if msg.author == guild.me and msg.embeds:
-            embed = await build_embed(guild)
-            view = HourButtonView(guild)
-            # content=None で前のテキストを消す
-            await msg.edit(content=None, embed=embed, view=view)
-            break
 
 # スラッシュコマンド
 class Handraise(commands.Cog):
