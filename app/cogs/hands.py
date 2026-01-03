@@ -55,7 +55,7 @@ async def build_embed(guild: discord.Guild):
         if role is None:
             continue
         
-        members = [m.display_name for m in role.members]
+        members = [f"・{m.display_name}" for m in role.members]
         text = "なし" if len(members) == 0 else "\n".join(members)
         embed.add_field(name=f"{hour} 時", value=text, inline=False)
 
