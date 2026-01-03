@@ -5,6 +5,7 @@ import json
 import random
 from discord import app_commands
 from discord.ext import commands
+import re
 
 HOUR_JSON = os.path.join(os.path.dirname(__file__), "..", "hours.json")
 
@@ -20,9 +21,25 @@ def load_hours():
             data = {}
     return data
 
+# 挙手機能用のhours書込み関数
 def save_hours(data):
     with open(HOUR_JSON, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
+
+# botダウン時のhours再構築
+async def sync_hours_from_roles(guild: discord.Guild):
+    """
+    サーバー内の ○○h ロールを走査して hours.json を再構築する
+    """
+    hours = {}
+
+    for role in guild.roles:
+        m = re.fullmatch(r"(\d+)h", role.name)
+        if m:
+            hour = m.group(1)
+            hours[hour] = role.id
+
+    save_hours(hours)
 
 # Embed生成関数
 async def build_embed(guild: discord.Guild):
@@ -38,7 +55,7 @@ async def build_embed(guild: discord.Guild):
         if role is None:
             continue
         
-        members = [m.mention for m in role.members]
+        members = [m.display_name for m in role.members]
         text = "なし" if len(members) == 0 else "\n".join(members)
         embed.add_field(name=f"{hour} 時", value=text, inline=False)
 

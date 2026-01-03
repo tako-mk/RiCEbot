@@ -3,6 +3,7 @@ import discord
 from discord.ext import commands
 import threading
 from http.server import HTTPServer, BaseHTTPRequestHandler
+from cogs.hands import sync_hours_from_roles
 
 class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
@@ -56,6 +57,8 @@ async def on_ready():
     print(f"✅ ログイン成功: {bot.user}")
     await bot.tree.sync()
     print("✅ スラッシュコマンド同期完了")
+    for guild in bot.guilds:
+        await sync_hours_from_roles(guild)
 
 
 # -----------------------
