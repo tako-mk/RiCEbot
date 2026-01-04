@@ -1,6 +1,6 @@
 import aiohttp
 
-BASE_URL = "https://lounge.mkcentral.com/mkworld"
+BASE_URL = "https://lounge.mkcentral.com"
 
 async def fetch_player(discord_id: int, game="world", season=None):
     params = {
