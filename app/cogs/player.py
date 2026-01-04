@@ -66,7 +66,7 @@ class AveMMR(commands.Cog):
         )
 
         embed.set_footer(
-            text=f"{len(mmr_list)}人分 | 未取得 {skipped}人"
+            text=f"{len(mmr_list)}人分 | Placement {skipped}人"
         )
 
         await interaction.followup.send(embed=embed)
