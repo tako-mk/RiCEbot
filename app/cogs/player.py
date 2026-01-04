@@ -57,13 +57,21 @@ class Player(commands.Cog):
 
         await interaction.followup.send(embed=embed)
     @app_commands.command(name="avemmr")
-    async def avemmr(self, interaction, role):
+    async def avemmr(
+        self,
+        interaction: discord.Interaction,
+        role: discord.Role
+    ):
         await self._average_mmr_command(
             interaction, role, fetch_mmr, "MMR"
         )
 
     @app_commands.command(name="avepeak")
-    async def avepeak(self, interaction, role):
+    async def avepeak(
+        self,
+        interaction: discord.Interaction,
+        role: discord.Role
+    ):
         await self._average_mmr_command(
             interaction, role, fetch_peak, "Peak MMR"
         )
