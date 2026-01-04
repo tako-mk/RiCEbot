@@ -56,6 +56,7 @@ class Player(commands.Cog):
         embed.set_footer(text=f"{len(values)}人分 | placement {skipped}人")
 
         await interaction.followup.send(embed=embed)
+
     @app_commands.command(name="avemmr")
     async def avemmr(
         self,
