@@ -2,7 +2,7 @@ import aiohttp
 
 BASE_URL = "https://lounge.mkcentral.com"
 
-async def fetch_player(discord_id: int, game="world", season=None):
+async def fetch_player(discord_id: int, game="mkworld", season=None):
     params = {
         "discordId": str(discord_id),
         "game": game
@@ -17,7 +17,7 @@ async def fetch_player(discord_id: int, game="world", season=None):
             return await resp.json()
 
 
-async def fetch_mmr(discord_id: int, game="world"):
+async def fetch_mmr(discord_id: int, game="mkworld"):
     data = await fetch_player(discord_id, game)
     if not data:
         return None
