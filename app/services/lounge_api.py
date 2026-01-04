@@ -22,3 +22,9 @@ async def fetch_mmr(discord_id: int, game="mkworld"):
     if not data:
         return None
     return data.get("mmr")
+
+async def fetch_peak(discord_id: int, game="mkworld"):
+    data = await fetch_player(discord_id, game)
+    if not data:
+        return None
+    return data.get("maxMmr")
