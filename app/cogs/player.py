@@ -52,7 +52,7 @@ class Player(commands.Cog):
         embed = discord.Embed(
             title=f"{role.name} の{title_suffix}",
             description="\n".join(lines[:20]),
-            color=discord.Color.blue()
+            color=discord.Color.green()
         )
         embed.add_field(name="平均", value=f"**{avg}**", inline=False)
         embed.set_footer(text=f"{len(values)}人分 | placement {skipped}人")
@@ -159,7 +159,7 @@ class Player(commands.Cog):
         embed = discord.Embed(
             title=f"{target.display_name} VR",
             description=f"**{vr_value}**",
-            color=discord.Color.green()
+            color=discord.Color.orange()
         )
 
         await interaction.response.send_message(embed=embed)
@@ -221,7 +221,7 @@ class Player(commands.Cog):
         avg = int(statistics.mean(values))
 
         embed = discord.Embed(
-            title=f"{role.name} の平均VR",
+            title=f"{role.name} のVR",
             description="\n".join(lines[:20]),
             color=discord.Color.orange()
         )
