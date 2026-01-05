@@ -17,7 +17,7 @@ def run_server():
     server.serve_forever()
 
 # supabase 週一アクセス
-@tasks.loop(days=6)
+@tasks.loop(hours = 24 * 6)
 async def supabase_keep_alive_loop():
     from tasks.keep_alive import keep_supabase_alive
     await keep_supabase_alive()
