@@ -43,6 +43,7 @@ class Track(commands.Cog):
                 self.track_dict[normalized_alias] = (name, image_url)
                 print(f"登録: {normalized_alias} -> {name}")  # 確認用
 
+    # /track name:○○
     @app_commands.command(name="track")
     async def track(self, interaction: discord.Interaction, name: str):
         """指定コースの情報を表示"""
