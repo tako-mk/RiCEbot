@@ -7,7 +7,9 @@ from discord import app_commands
 from discord.ext import commands
 import re
 
+# hoursロールidの保存場所
 HOUR_JSON = os.path.join(os.path.dirname(__file__), "..", "hours.json")
+# 最後のEmbedメッセージidの保存場所
 MSG_JSON = os.path.join(os.path.dirname(__file__), "..", "handraise_message.json")
 
 # 挙手機能用のhours読み込み関数
@@ -45,6 +47,7 @@ async def sync_hours_from_roles(guild: discord.Guild):
 
     save_hours(hours)
 
+# 最後のEmbedメッセージidの取得
 def load_message_id():
     if not os.path.exists(MSG_JSON):
         return None
@@ -54,6 +57,7 @@ def load_message_id():
         except json.JSONDecodeError:
             return None
 
+# 最後のEmbedメッセージidの保存
 def save_message_id(message_id: int):
     with open(MSG_JSON, "w", encoding="utf-8") as f:
         json.dump({"message_id": message_id}, f, indent=2)
@@ -97,7 +101,7 @@ async def resend_handraise_embed(channel: discord.TextChannel, guild: discord.Gu
 
     save_message_id(new_msg.id)
 
-# Embedの下のボタンの関数
+# hoursのボタンの表示
 class HourButtonView(View):
     def __init__(self, guild: discord.Guild):
         super().__init__(timeout=None)
@@ -107,6 +111,7 @@ class HourButtonView(View):
         for hour, role_id in hours.items():
             self.add_item(HourButton(hour, role_id))
 
+# hoursのボタンのコールバック処理
 class HourButton(Button):
     def __init__(self, hour, role_id):
         super().__init__(label=hour, style=discord.ButtonStyle.primary)
@@ -132,11 +137,12 @@ class HourButton(Button):
         # interaction未応答防止（表示しないACK）
         await interaction.response.defer(ephemeral=True)
 
-# スラッシュコマンド
+# 挙手に関するコマンド
 class Handraise(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    # /set hour:○○
     @app_commands.command(name="set")
     async def set_hour(self, interaction: discord.Interaction, hour: str):
         """hourの登録"""
@@ -152,6 +158,7 @@ class Handraise(commands.Cog):
 
         await interaction.response.send_message(embed=embed, view=view)
 
+    # /out hour:○○
     @app_commands.command(name="out")
     async def out_hour(self, interaction: discord.Interaction, hour: str):
         """hourの削除"""
@@ -171,12 +178,14 @@ class Handraise(commands.Cog):
         view = HourButtonView(interaction.guild)
         await interaction.response.send_message(embed=embed, view=view)
 
+    # /now
     @app_commands.command(name="now")
     async def now(self, interaction: discord.Interaction):
         """現在の挙手状況を確認"""
         await resend_handraise_embed(interaction.channel, interaction.guild)
         await interaction.response.send_message("現在の挙手状況を更新しました。", ephemeral=True)
 
+    # /can hour:○○ (user:○○)
     @app_commands.command(name="can")
     async def can_hour(
         self,
@@ -203,6 +212,7 @@ class Handraise(commands.Cog):
         await resend_handraise_embed(interaction.channel, interaction.guild)
         await interaction.response.send_message(msg, ephemeral=True)
 
+    # /drop hour:○○ (user:○○)
     @app_commands.command(name="drop")
     async def drop_hour(
         self,
@@ -229,6 +239,7 @@ class Handraise(commands.Cog):
         await resend_handraise_embed(interaction.channel, interaction.guild)
         await interaction.response.send_message(msg, ephemeral=True)
 
+    # /clear
     @app_commands.command(name="clear")
     async def clear_hours(self, interaction: discord.Interaction):
         """挙手状況のクリア"""
@@ -244,7 +255,7 @@ class Handraise(commands.Cog):
         view = HourButtonView(interaction.guild)
         await interaction.response.send_message("✅ 全ての挙手状況をクリアしました。", embed=embed, view=view)
 
-
+    # /pick hour:○○
     @app_commands.command(name="pick")
     async def pick_hour(self, interaction: discord.Interaction, hour: str):
         """そのhourのメンバーからランダムで1人選ぶ"""
@@ -261,6 +272,7 @@ class Handraise(commands.Cog):
         member = random.choice(role.members)
         await interaction.response.send_message(f" {hour} の外交担当: {member.mention}")
 
+# スラッシュコマンド登録
 async def setup(bot):
     await bot.add_cog(Handraise(bot))
 

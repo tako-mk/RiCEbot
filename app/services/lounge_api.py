@@ -2,6 +2,7 @@ import aiohttp
 
 BASE_URL = "https://lounge.mkcentral.com"
 
+# mkworld lounge 個人データ取得
 async def fetch_player(discord_id: int, game="mkworld", season=None):
     params = {
         "discordId": str(discord_id),
@@ -16,13 +17,14 @@ async def fetch_player(discord_id: int, game="mkworld", season=None):
                 return None
             return await resp.json()
 
-
+# mkworld lounge mmr取得
 async def fetch_mmr(discord_id: int, game="mkworld"):
     data = await fetch_player(discord_id, game)
     if not data:
         return None
     return data.get("mmr")
 
+# mkworld lounge peak取得
 async def fetch_peak(discord_id: int, game="mkworld"):
     data = await fetch_player(discord_id, game)
     if not data:

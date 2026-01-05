@@ -22,7 +22,7 @@ def run_server():
 class MyBot(commands.Bot):
     def __init__(self):
         super().__init__(
-            command_prefix="!",
+            command_prefix="rice!",
             intents=discord.Intents.all(),
         )
 

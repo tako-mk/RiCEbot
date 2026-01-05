@@ -7,11 +7,12 @@ import statistics
 from services.lounge_api import fetch_mmr
 from services.lounge_api import fetch_peak
 
-
+# プレイヤーデータに関するコマンド
 class Player(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
+    # ラウンジデータ取得・Embed作成関数
     async def _average_mmr_command(
         self,
         interaction: discord.Interaction,
@@ -57,22 +58,26 @@ class Player(commands.Cog):
 
         await interaction.followup.send(embed=embed)
 
+    # /avemmr role:○○
     @app_commands.command(name="avemmr")
     async def avemmr(
         self,
         interaction: discord.Interaction,
         role: discord.Role
     ):
+        """mmrリスト・平均の表示"""
         await self._average_mmr_command(
             interaction, role, fetch_mmr, "MMR"
         )
 
+    # /avepeak role:○○
     @app_commands.command(name="avepeak")
     async def avepeak(
         self,
         interaction: discord.Interaction,
         role: discord.Role
     ):
+        """peakmmrリスト・平均の表示"""
         await self._average_mmr_command(
             interaction, role, fetch_peak, "Peak MMR"
         )
