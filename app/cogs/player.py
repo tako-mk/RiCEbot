@@ -115,7 +115,6 @@ class Player(commands.Cog):
 
             await interaction.response.send_message(
                 f"✅ VRを **{vr}** で登録しました。",
-                ephemeral=True
             )
 
         except Exception as e:
