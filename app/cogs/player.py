@@ -124,6 +124,44 @@ class Player(commands.Cog):
             )
             print(f"[vr_register] error: {e}")
 
+    @app_commands.command(name="vr")
+    @app_commands.describe(user="ユーザー（省略可）")
+    async def vr(
+        self,
+        interaction: discord.Interaction,
+        user: discord.User | None = None
+    ):
+        """登録されているVRを表示します"""
+
+        target = user or interaction.user
+        user_id = target.id
+
+        try:
+            result = (
+                supabase
+                .table("user_vr")
+                .select("vr")
+                .eq("user_id", user_id)
+                .single()
+                .execute()
+            )
+
+            vr_value = result.data["vr"]
+
+        except Exception:
+            await interaction.response.send_message(
+                f"{target.display_name} のVRは登録されていません。",
+                ephemeral=True
+            )
+            return
+
+        embed = discord.Embed(
+            title=f"{target.display_name} VR",
+            description=f"**{vr_value}**",
+            color=discord.Color.green()
+        )
+
+        await interaction.response.send_message(embed=embed)
 
 # スラッシュコマンド登録
 async def setup(bot: commands.Bot):
