@@ -124,6 +124,7 @@ class Player(commands.Cog):
             )
             print(f"[vr_register] error: {e}")
 
+    # /vr
     @app_commands.command(name="vr")
     @app_commands.describe(user="ユーザー（省略可）")
     async def vr(
@@ -162,6 +163,73 @@ class Player(commands.Cog):
         )
 
         await interaction.response.send_message(embed=embed)
+
+    # /avevr role:○○
+    @app_commands.command(name="avevr")
+    @app_commands.describe(role="ロール")
+    async def avevr(
+        self,
+        interaction: discord.Interaction,
+        role: discord.Role
+    ):
+        """ロール内のVR平均を表示します"""
+
+        await interaction.response.defer()
+
+        members = [m for m in role.members if not m.bot]
+        if not members:
+            await interaction.followup.send("そのロールにメンバーがいません。")
+            return
+
+        user_ids = [m.id for m in members]
+
+        try:
+            result = (
+                supabase
+                .table("user_vr")
+                .select("user_id, vr")
+                .in_("user_id", user_ids)
+                .execute()
+            )
+        except Exception as e:
+            await interaction.followup.send("VRデータの取得に失敗しました。")
+            print(f"[avevr] supabase error: {e}")
+            return
+
+        vr_map = {
+            row["user_id"]: int(row["vr"])
+            for row in result.data
+            if row["vr"].isdigit()
+        }
+
+        lines = []
+        values = []
+        skipped = 0
+
+        for member in members:
+            vr = vr_map.get(member.id)
+            if vr is None:
+                skipped += 1
+                continue
+            values.append(vr)
+            lines.append(f"{member.display_name}: **{vr}**")
+
+        if not values:
+            await interaction.followup.send("VRが登録されているメンバーがいません。")
+            return
+
+        avg = int(statistics.mean(values))
+
+        embed = discord.Embed(
+            title=f"{role.name} の平均VR",
+            description="\n".join(lines[:20]),
+            color=discord.Color.orange()
+        )
+        embed.add_field(name="平均VR", value=f"**{avg}**", inline=False)
+        embed.set_footer(text=f"{len(values)}人分 | 未登録 {skipped}人")
+
+        await interaction.followup.send(embed=embed)
+
 
 # スラッシュコマンド登録
 async def setup(bot: commands.Bot):
