@@ -3,6 +3,7 @@ from discord.ext import commands
 from discord import app_commands
 import asyncio
 import statistics
+from services.supabase import supabase
 
 from services.lounge_api import fetch_mmr
 from services.lounge_api import fetch_peak
@@ -82,6 +83,49 @@ class Player(commands.Cog):
             interaction, role, fetch_peak, "Peak MMR"
         )
 
+    # /vr_register vr:○○
+    @app_commands.command(name="vr_register")
+    @app_commands.describe(vr="VR（半角数字）")
+    async def vr_register(
+        self,
+        interaction: discord.Interaction,
+        vr: str
+    ):
+        """自分のVRを登録・更新します"""
 
+        # 半角数字チェック
+        if not vr.isdigit():
+            await interaction.response.send_message(
+                "VRは半角数字で入力してください。",
+                ephemeral=True
+            )
+            return
+
+        user_id = interaction.user.id
+
+        try:
+            # upsert（既にあれば更新、なければ追加）
+            supabase.table("user_vr").upsert(
+                {
+                    "user_id": user_id,
+                    "vr": vr
+                },
+                on_conflict="user_id"
+            ).execute()
+
+            await interaction.response.send_message(
+                f"✅ VRを **{vr}** で登録しました。",
+                ephemeral=True
+            )
+
+        except Exception as e:
+            await interaction.response.send_message(
+                "❌ VRの登録に失敗しました。",
+                ephemeral=True
+            )
+            print(f"[vr_register] error: {e}")
+
+
+# スラッシュコマンド登録
 async def setup(bot: commands.Bot):
     await bot.add_cog(Player(bot))

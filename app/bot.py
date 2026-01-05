@@ -1,6 +1,7 @@
 import os
 import discord
 from discord.ext import commands
+from discord.ext import tasks
 import threading
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from cogs.hands import sync_hours_from_roles
@@ -15,6 +16,11 @@ def run_server():
     server = HTTPServer(("0.0.0.0", 8000), Handler)
     server.serve_forever()
 
+# supabase 週一アクセス
+@tasks.loop(days=6)
+async def supabase_keep_alive_loop():
+    from tasks.keep_alive import keep_supabase_alive
+    await keep_supabase_alive()
 
 # -----------------------
 # Bot クラス定義
@@ -55,10 +61,19 @@ bot = MyBot()
 @bot.event
 async def on_ready():
     print(f"✅ ログイン成功: {bot.user}")
+
+    # スラッシュコマンド同期
     await bot.tree.sync()
     print("✅ スラッシュコマンド同期完了")
+    
+    # hoursロール読み込み
     for guild in bot.guilds:
         await sync_hours_from_roles(guild)
+    
+    # supabase起動
+    if not supabase_keep_alive_loop.is_running():
+        supabase_keep_alive_loop.start()
+    print("Bot is ready")
 
 
 # -----------------------
