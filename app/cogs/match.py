@@ -360,7 +360,7 @@ class ResultRegister(commands.Cog):
             return
 
         embed = build_result_detail_embed(res[0])
-        await interaction.followup.send(embed=embed, ephemeral=True)
+        await interaction.followup.send(embed=embed)
 
     # result_12_delete
     @app_commands.command(
