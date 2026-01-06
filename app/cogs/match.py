@@ -115,14 +115,14 @@ def build_embed(results, page, total_pages):
             f'{str(r["result_id"]).rjust(4)}  '
             f'{str(r["my_score"]).rjust(3)} - '
             f'{str(r["enemy_score"]).rjust(3)}  '
-            f'{r["enemy"].ljust(8)} '
+            f'{r["enemy"].ljust(5)} '
             f'{result.ljust(4)}  '
             f'{r["date"]}'
         )
         lines.append(line)
 
     embed = discord.Embed(
-        title="12レース 戦績",
+        title="6v6 戦績",
         description="```text\n" + "\n".join(lines) + "\n```"
     )
 
