@@ -342,7 +342,7 @@ class ResultRegister(commands.Cog):
         interaction: discord.Interaction,
         id: int
     ):
-        await interaction.response.defer(ephemeral=True)
+        await interaction.response.defer()
 
         res = (
             supabase.table("result_12")
