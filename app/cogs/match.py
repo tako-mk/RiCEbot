@@ -20,7 +20,7 @@ def load_member_data():
     alias_map = {}      # alias -> 登録名
     id_map = {}         # discord_id -> 登録名
 
-    with MEMBER_FILE.open(encoding="utf-8") as f:
+    with open(MEMBER_FILE, encoding="utf-8") as f:
         for line in f:
             line = line.strip()
             if not line or line.startswith("#"):
