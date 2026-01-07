@@ -178,7 +178,7 @@ def build_embed_24(results, page, total_pages):
         lines.append(line2)
 
     embed = discord.Embed(
-        title="24人戦 (6v6v6v6) 戦績",
+        title="6v6v6v6 戦績",
         description="```text\n" + "\n".join(lines) + "\n```"
     )
 
