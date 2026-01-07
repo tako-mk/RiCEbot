@@ -115,7 +115,7 @@ def build_embed(results, page, total_pages):
             f'{str(r["result_id"]).rjust(3)} '
             f'{str(r["my_score"]).rjust(3)} - '
             f'{str(r["enemy_score"]).rjust(3)} '
-            f'{r["enemy"].ljust(4)} '
+            f'{r["enemy"].ljust(5)} '
             f'{result.ljust(4)} '
             f'{r["date"]}'
         )
