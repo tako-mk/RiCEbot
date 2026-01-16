@@ -7,6 +7,7 @@ import jaconv
 
 TRACK_FILE = os.path.join(os.path.dirname(__file__), "..", "data", "track.json")
 CONNECT_FILE = os.path.join(os.path.dirname(__file__), "..", "data", "track_connect.json")
+NUMBER_EMOJIS = ["0️⃣", "1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
 
 class ConnectView(discord.ui.View):
     def __init__(self, connects, end_name):
@@ -20,7 +21,6 @@ class ConnectView(discord.ui.View):
 class ConnectButton(discord.ui.Button):
     def __init__(self, index: int):
         super().__init__(
-            label=str(index),
             style=discord.ButtonStyle.primary,
             emoji=f"{index}\N{COMBINING ENCLOSING KEYCAP}"
         )
@@ -41,12 +41,24 @@ class ConnectButton(discord.ui.Button):
             color=0xe67e22
         )
 
-        if movie != "未登録":
-            embed.add_field(name="動画", value=movie, inline=False)
-        else:
-            embed.add_field(name="動画", value="動画が未登録です。", inline=False)
+        content = None
 
-        await interaction.response.edit_message(embed=embed, view=None)
+        if movie == "未登録":
+            embed.add_field(
+                name="動画",
+                value="動画が未登録です。",
+                inline=False
+            )
+        else:
+            # Embed外にリンクを出す
+            content = movie
+
+        await interaction.response.edit_message(
+            content=content,
+            embed=embed,
+            view=None
+        )
+
 
 class Track(commands.Cog):
     def __init__(self, bot):
@@ -149,13 +161,11 @@ class Track(commands.Cog):
         embed = discord.Embed(
             title=f'終点「{end_name}」',
             description="\n".join(lines),
-            color=0x1abc9c
+            color=0xe67e22
         )
 
         view = ConnectView(matched, end_name)
         await interaction.response.send_message(embed=embed, view=view)
-
-
 
 async def setup(bot):
     await bot.add_cog(Track(bot))
