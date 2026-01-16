@@ -41,21 +41,17 @@ class ConnectButton(discord.ui.Button):
             color=0x1abc9c
         )
 
-        content = None
-
         if movie == "未登録":
             embed.add_field(
                 name="動画",
                 value="動画が未登録です。",
                 inline=False
             )
+            await interaction.response.send_message(embed=embed)
         else:
-            content = movie
+            await interaction.response.send_message(embed=embed)
+            await interaction.followup.send(movie)
 
-        await interaction.response.send_message(
-            content=content,
-            embed=embed
-        )
 
 class Track(commands.Cog):
     def __init__(self, bot):
