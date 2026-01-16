@@ -6,12 +6,56 @@ import json
 import jaconv
 
 TRACK_FILE = os.path.join(os.path.dirname(__file__), "..", "data", "track.json")
+CONNECT_FILE = os.path.join(os.path.dirname(__file__), "..", "data", "track_connect.json")
+
+class ConnectView(discord.ui.View):
+    def __init__(self, connects, end_name):
+        super().__init__(timeout=180)
+        self.connects = connects
+        self.end_name = end_name
+
+        for i, _ in enumerate(connects):
+            self.add_item(ConnectButton(i))
+
+class ConnectButton(discord.ui.Button):
+    def __init__(self, index: int):
+        super().__init__(
+            label=str(index),
+            style=discord.ButtonStyle.primary,
+            emoji=f"{index}\N{COMBINING ENCLOSING KEYCAP}"
+        )
+        self.index = index
+
+    async def callback(self, interaction: discord.Interaction):
+        view: ConnectView = self.view
+        data = view.connects[self.index]
+
+        start = data["start"]
+        end = data["end"]
+        desc = data["description"]
+        movie = data.get("movie", "未登録")
+
+        embed = discord.Embed(
+            title=f"{start} → {end}",
+            description=desc,
+            color=0xe67e22
+        )
+
+        if movie != "未登録":
+            embed.add_field(name="動画", value=movie, inline=False)
+        else:
+            embed.add_field(name="動画", value="動画が未登録です。", inline=False)
+
+        await interaction.response.edit_message(embed=embed, view=None)
 
 class Track(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.track_dict = {}
         self.load_tracks()
+        self.connects = []
+        self.load_connects()
+
 
     def normalize(self, s: str) -> str:
         """入力文字列を小文字・カタカナ統一・全角半角吸収"""
@@ -43,6 +87,18 @@ class Track(commands.Cog):
                 self.track_dict[normalized_alias] = (name, image_url)
                 print(f"登録: {normalized_alias} -> {name}")  # 確認用
 
+    def load_connects(self):
+        self.connects = []
+        if not os.path.exists(CONNECT_FILE):
+            print("track_connect.json が見つかりません")
+            return
+
+        with open(CONNECT_FILE, "r", encoding="utf-8") as f:
+            try:
+                self.connects = json.load(f)
+            except json.JSONDecodeError as e:
+                print(f"connect JSON エラー: {e}")
+
     # /track name:○○
     @app_commands.command(name="track")
     async def track(self, interaction: discord.Interaction, name: str):
@@ -58,6 +114,47 @@ class Track(commands.Cog):
         embed = discord.Embed(title=track_name, color=0x1abc9c)
         embed.set_image(url=image_url)
         await interaction.response.send_message(embed=embed)
+
+    # /ctrack name:○○
+    @app_commands.command(name="ctrack")
+    async def ctrack(self, interaction: discord.Interaction, name: str):
+        normalized = self.normalize(name)
+
+        if normalized not in self.track_dict:
+            await interaction.response.send_message(
+                f"コース「{name}」は見つかりませんでした。",
+                ephemeral=True
+            )
+            return
+
+        end_name, _ = self.track_dict[normalized]
+
+        # 終点が一致する接続を集める
+        matched = [
+            c for c in self.connects
+            if self.normalize(c["end"]) == self.normalize(end_name)
+        ]
+
+        if not matched:
+            await interaction.response.send_message(
+                f"「{end_name}」を終点とする接続は見つかりません。",
+                ephemeral=True
+            )
+            return
+
+        lines = []
+        for i, c in enumerate(matched):
+            lines.append(f"{i}️⃣ {c['start']}")
+
+        embed = discord.Embed(
+            title=f'終点「{end_name}」',
+            description="\n".join(lines),
+            color=0x1abc9c
+        )
+
+        view = ConnectView(matched, end_name)
+        await interaction.response.send_message(embed=embed, view=view)
+
 
 
 async def setup(bot):
