@@ -50,15 +50,12 @@ class ConnectButton(discord.ui.Button):
                 inline=False
             )
         else:
-            # Embed外にリンクを出す
             content = movie
 
-        await interaction.response.edit_message(
+        await interaction.response.send_message(
             content=content,
-            embed=embed,
-            view=None
+            embed=embed
         )
-
 
 class Track(commands.Cog):
     def __init__(self, bot):
