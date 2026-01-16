@@ -38,7 +38,7 @@ class ConnectButton(discord.ui.Button):
         embed = discord.Embed(
             title=f"{start} → {end}",
             description=desc,
-            color=0xe67e22
+            color=0x1abc9c
         )
 
         content = None
@@ -161,7 +161,7 @@ class Track(commands.Cog):
         embed = discord.Embed(
             title=f'終点「{end_name}」',
             description="\n".join(lines),
-            color=0xe67e22
+            color=0x1abc9c
         )
 
         view = ConnectView(matched, end_name)
