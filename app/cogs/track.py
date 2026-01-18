@@ -7,7 +7,7 @@ import jaconv
 
 TRACK_FILE = os.path.join(os.path.dirname(__file__), "..", "data", "track.json")
 CONNECT_FILE = os.path.join(os.path.dirname(__file__), "..", "data", "track_connect.json")
-NUMBER_EMOJIS = ["0️⃣", "1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
+NUMBER_EMOJIS = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
 
 class ConnectView(discord.ui.View):
     def __init__(self, connects, end_name):
